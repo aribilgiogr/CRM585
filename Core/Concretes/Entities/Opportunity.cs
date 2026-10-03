@@ -13,17 +13,15 @@ namespace Core.Concretes.Entities
         public DateTime? ExpectedCloseDate { get; set; }
         public DateTime? ActualCloseDate { get; set; }
 
-
-        [ForeignKey(nameof(AssignedUser))]
         public string? AssignedUserId { get; set; }
         public virtual AppUser? AssignedUser { get; set; }
 
-
-        [ForeignKey(nameof(Customer))]
         public string CustomerId { get; set; } = null!;
         public virtual Customer Customer { get; set; } = null!;
 
         public OpportunityStage Stage { get; set; }
         public OpportunityStatus Status { get; set; }
+
+        public virtual ICollection<Activity> Activities { get; set; } = [];
     }
 }

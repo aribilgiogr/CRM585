@@ -10,5 +10,8 @@ namespace Core.Concretes.Entities
         public DateTime? UpdatedAt { get; set; }
 
         public virtual ICollection<Customer> Customers { get; set; } = [];
+        public virtual ICollection<Lead> Leads { get; set; } = [];
+        public virtual ICollection<Opportunity> Opportunities { get; set; } = [];
+        public virtual ICollection<Activity> Activities { get; set; } = [];
     }
 }
