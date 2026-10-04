@@ -1,4 +1,5 @@
 ﻿using Core.Concretes.DTOs.Auth;
+using System.Security.Claims;
 using Utilities._585.Models;
 
 namespace Core.Abstracts.IServices
@@ -12,5 +13,7 @@ namespace Core.Abstracts.IServices
         Task<Reply> ResetPasswordAsync(ResetPasswordDto model);
         Task<Reply> ChangePasswordAsync(ChangePasswordDto model);
         Task<Reply> ActivateAccountAsync(ActivateAccountDto model);
+
+        bool IsSignedIn(ClaimsPrincipal User);
     }
 }

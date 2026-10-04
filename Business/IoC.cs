@@ -1,4 +1,6 @@
-﻿using Core.Concretes.Entities;
+﻿using Business.Services;
+using Core.Abstracts.IServices;
+using Core.Concretes.Entities;
 using Data.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,10 @@ namespace Business
                     .AddDefaultTokenProviders();
 
             services.AddUnitOfWork<AppDbContext>();
+
+            services.AddSmtpEmailSender(configuration);
+
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

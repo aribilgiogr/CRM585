@@ -1,0 +1,28 @@
+﻿@inject IAuthService Auth
+
+@if (Auth.IsSignedIn(User))
+{
+    <div class="dropdown">
+        <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            ⚙
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                @if (User.IsInRole("ADM"))
+                {
+                    <a asp-action="admin" asp-controller="account" class="dropdown-item">Yönetim Paneli</a>
+                }
+                else if(User.IsInRole("SP"))
+                {
+                    <a asp-action="index" asp-controller="account" class="dropdown-item">Yönetim Paneli</a>
+                }
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form asp-action="logout" asp-controller="account" method="post">
+                    <button type="submit" class="dropdown-item text-danger">Çıkış Yap</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}

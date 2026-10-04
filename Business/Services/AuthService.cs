@@ -1,7 +1,13 @@
-﻿using Core.Abstracts.IServices;
+﻿using AutoMapper;
+using Core.Abstracts.IServices;
 using Core.Concretes.DTOs.Auth;
 using Core.Concretes.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
+using System.Text;
+using Utilities._585.Extensions;
 using Utilities._585.Models;
 
 namespace Business.Services
@@ -11,12 +17,16 @@ namespace Business.Services
         private readonly UserManager<AppUser> userManager;
         private readonly SignInManager<AppUser> signInManager;
         private readonly RoleManager<AppUserRole> roleManager;
+        private readonly IMapper mapper;
+        private readonly IEmailSender emailSender;
 
-        public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppUserRole> roleManager)
+        public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppUserRole> roleManager, IMapper mapper, IEmailSender emailSender)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.roleManager = roleManager;
+            this.mapper = mapper;
+            this.emailSender = emailSender;
         }
 
         public Task<Reply> ActivateAccountAsync(ActivateAccountDto model)
@@ -29,10 +39,33 @@ namespace Business.Services
             throw new NotImplementedException();
         }
 
-        public Task<Reply> ForgotPasswordAsync(string email)
+        public async Task<Reply> ForgotPasswordAsync(string email)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await userManager.FindByEmailAsync(email);
+                if (user == null) return Reply.Fail("Kullanıcı bulunamadı!");
+
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                var validToken = token.Base64UrlEncode();
+                var message = $"Parolanızı sıfırlamak için <a href='https://localhost:7196/account/resetpassword?email={email}&token={validToken}'>tıklayız</a>.";
+                try
+                {
+                    await emailSender.SendEmailAsync(email, "Parola Sıfırlama", message);
+                }
+                catch (Exception ex)
+                {
+                    return Reply.Fail(ex.Message);
+                }
+                return Reply.Success();
+            }
+            catch (Exception ex)
+            {
+                return Reply.Fail(["Şifre hatırlatma aşamasında beklenmeyen bir hata oluştu!", ex.Message]);
+            }
         }
+
+        public bool IsSignedIn(ClaimsPrincipal User) => signInManager.IsSignedIn(User);
 
         public async Task<Reply> LoginAsync(LoginDto model)
         {
@@ -83,6 +116,7 @@ namespace Business.Services
         {
             try
             {
+                /*
                 var user = new AppUser
                 {
                     FirstName = model.FirstName,
@@ -91,7 +125,8 @@ namespace Business.Services
                     UserName = model.Email,
                     EmailConfirmed=false // token göndererek bu kısmı true yapacağız.
                 };
-
+                */
+                var user = mapper.Map<AppUser>(model);
                 var result = await userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
