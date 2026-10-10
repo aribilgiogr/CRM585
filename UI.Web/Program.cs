@@ -1,8 +1,11 @@
 using Business;
+using Core.Abstracts.IServices;
 using Core.Concretes.Entities;
+using Core.Concretes.Enums;
 using Data.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using UI.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +54,10 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapPost("/api/leads/assign/{id}", async (ILeadService service, ClaimsPrincipal user, string id) => await service.AssignLeadAsync(id, user)).RequireAuthorization();
+
+app.MapPost("/api/leads/addactivity/{type}/{id}", async (ILeadService service, ClaimsPrincipal user, ActivityType type, string id) => await service.AddActivityAsync(type,id,user));
 
 app.MapStaticAssets();
 app.MapControllerRoute(

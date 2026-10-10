@@ -146,9 +146,21 @@ namespace Business.Services
             }
         }
 
-        public Task<Reply> ResetPasswordAsync(ResetPasswordDto model)
+        public async Task<Reply> ResetPasswordAsync(ResetPasswordDto model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await userManager.FindByEmailAsync(model.Email);
+                if (user == null) return Reply.Fail("Kullanıcı bulunamadı!");
+                var token = model.Token.Base64UrlDecode();
+                var result = await userManager.ResetPasswordAsync(user, token, model.Password);
+                if (result.Succeeded) return Reply.Success();
+                return Reply.Fail(result.Errors.Select(x => x.Description));
+            }
+            catch (Exception ex)
+            {
+                return Reply.Fail(["Şifre yenileme sırasında bir hata oluştu!", ex.Message]);
+            }
         }
     }
 }

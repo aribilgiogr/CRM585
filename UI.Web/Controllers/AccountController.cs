@@ -102,5 +102,34 @@ namespace UI.Web.Controllers
             }
             return View(model);
         }
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            var model = new ResetPasswordViewModel
+            {
+                Token = token,
+                Email = email
+            };
+            return View(model);
+        }
+
+        [HttpPost,ValidateAntiForgeryToken,AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var dto = mapper.Map<ResetPasswordDto>(model);
+                var reply = await auth.ResetPasswordAsync(dto);
+                if (reply.IsSuccess)
+                {
+                    return RedirectToAction("login");
+                }
+                foreach (var err in reply.Errors!)
+                {
+                    ModelState.AddModelError(string.Empty, err);
+                }
+            }
+            return View(model);
+        }
     }
 }

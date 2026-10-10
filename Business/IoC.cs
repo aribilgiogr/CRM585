@@ -26,7 +26,7 @@ namespace Business
             services.AddSmtpEmailSender(configuration);
 
             services.AddScoped<IAuthService, AuthService>();
-
+            services.AddScoped<ILeadService, LeadService>();
             return services;
         }
     }
