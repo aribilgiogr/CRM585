@@ -1,4 +1,5 @@
-﻿using Core.Concretes.Enums;
+﻿using Core.Concretes.Entities;
+using Core.Concretes.Enums;
 
 namespace Core.Concretes.DTOs.Customers
 {

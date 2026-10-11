@@ -5,5 +5,5 @@ using System.Text;
 
 namespace Core.Concretes.DTOs.Customers
 {
-    public record CreateCustomerDto(string Name, string? TaxNumber, string? TaxOffice, string? Address, string? City, bool Individual, string? AssignedUserId);
+    public record CreateCustomerDto(string Name, bool Individual, string? AssignedUserId, string LeadId, string? TaxNumber = null, string? TaxOffice = null, string? Address = null, string? City = null);
 }

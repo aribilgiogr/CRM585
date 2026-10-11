@@ -1,0 +1,130 @@
+﻿@using System.Security.Claims
+@model LeadDetailDto
+@{
+    ViewData["Title"] = "Detay: " + Model.Name;
+    string currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card rounded text-bg-white">
+            <div class="card-header p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">@ViewData["Title"]</h5>
+                        @if (Model.AssignedUserId != null)
+                        {
+                            <small class="text-muted">(@Model.AssignedUserName)</small>
+                        }
+                    </div>
+                    @if (Model.AssignedUserId == null)
+                    {
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="assignLead('@Model.Id')">Atama Yap</button>
+                    }
+                    else if (Model.ConvertedAt == null && Model.AssignedUserId == currentUserId)
+                    {
+                        <a asp-action="convert" asp-controller="leads" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">Müşteriye Dönüştür</a>
+                    }
+                    else if (Model.ConvertedAt != null)
+                    {
+                        <a asp-action="details" asp-controller="customers" asp-route-id="@Model.ConvertedCustomerId" class="btn btn-outline-secondary btn-sm">Müşteri</a>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <dl>
+                    <dt>E-posta Adresi:</dt>
+                    <dd>
+                        - <a href="mailto:@Model.Email" class="text-decoration-none link-primary">@Model.Email</a>
+                    </dd>
+                    <dt>Telefon Numarası:</dt>
+                    <dd>
+                        - <a href="tel:@Model.PhoneNumber" class="text-decoration-none link-primary">@Model.PhoneNumber</a>
+                    </dd>
+                    <dt>Notlar:</dt>
+                    <dd>
+                        <textarea disabled class="form-control">@Model.Notes?.Trim()</textarea>
+                    </dd>
+                    <dt>Durum:</dt>
+                    <dd>- @Html.DisplayFor(m => m.Status)</dd>
+                    <dt>Kaynak:</dt>
+                    <dd>- @Html.DisplayFor(m => m.Source)</dd>
+                    <dt>Son Güncellenme:</dt>
+                    <dd>- @Model.LastUpdatedAt.ToLongDateString()</dd>
+                    @if (Model.ConvertedAt != null)
+                    {
+                        <dt>Dönüşüm Tarihi:</dt>
+                        <dd>- @Model.ConvertedAt?.ToLongDateString()</dd>
+                    }
+                </dl>
+            </div>
+            <div class="card-footer">
+                <a asp-action="index" asp-controller="leads" class="btn btn-dark btn-sm">Veri Listesine Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card rounded text-bg-white">
+            <div class="card-header p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Etkinlikler:</h5>
+                    @if (Model.AssignedUserId != null && Model.ConvertedAt == null && Model.AssignedUserId == currentUserId)
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Etkinlikler
+                            </button>
+                            <ul class="dropdown-menu">
+                                @foreach (var item in Html.GetEnumSelectList<ActivityType>())
+                                {
+                                    <li>
+                                        <button class="dropdown-item" type="button" onclick="addLeadActivity('@item.Value', '@Model.Id')">@item.Text</button>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tip</th>
+                            <th>Başlık</th>
+                            <th>Oluşturulma</th>
+                            <th>Hedef</th>
+                            <th>Tamamlanma</th>
+                            <th>Gerçekleştiren</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Activities != null && Model.Activities.Any())
+                        {
+                            @foreach (var item in Model.Activities)
+                            {
+                                <tr>
+                                    <td>@item.Type</td>
+                                    <td>@item.Subject</td>
+                                    <td>@item.CreatedAt.ToShortDateString()</td>
+                                    <td>@item.DueDate?.ToShortDateString()</td>
+                                    <td>@item.CompletedAt?.ToShortDateString()</td>
+                                    <td>@item.AssignedUserName</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-primary fw-semibold">
+                                    Henüz etkinlik eklenmemiş.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

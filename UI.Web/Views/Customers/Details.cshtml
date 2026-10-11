@@ -1,0 +1,179 @@
+@using System.Security.Claims
+@model CustomerDetailDto
+@{
+    ViewData["Title"] = "Detay: " + Model.Name;
+    string currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card rounded text-bg-white">
+            <div class="card-header p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">@ViewData["Title"]</h5>
+                        @if (Model.AssignedUserId != null)
+                        {
+                            <small class="text-muted">(@Model.AssignedUserName)</small>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <dl>
+                    <dt>E-posta Adresi:</dt>
+                    <dd>- <a href="mailto:@Model.Email" class="text-decoration-none link-primary">@Model.Email</a></dd>
+                    <dt>Telefon Numarası:</dt>
+                    <dd>- <a href="tel:@Model.PhoneNumber" class="text-decoration-none link-primary">@Model.PhoneNumber</a></dd>
+                    <dt>Vergi No / Ofis:</dt>
+                    <dd>- @Model.TaxNumber @(!string.IsNullOrEmpty(Model.TaxOffice) ? (" / " + Model.TaxOffice) : "")</dd>
+                    <dt>Adres / Şehir:</dt>
+                    <dd>- @Model.Address @(!string.IsNullOrEmpty(Model.City) ? (" - " + Model.City) : "")</dd>
+                    <dt>Notlar:</dt>
+                    <dd><textarea disabled class="form-control">@Model.LeadNotes?.Trim()</textarea></dd>
+                    <dt>Tipi:</dt>
+                    <dd>- @(Model.Individual ? "Bireysel" : "Kurumsal")</dd>
+                    <dt>Durum:</dt>
+                    <dd>- @Html.DisplayFor(m => m.Status)</dd>
+                    <dt>Kaynak:</dt>
+                    <dd>- @Html.DisplayFor(m => m.LeadSource)</dd>
+                    <dt>Son Güncellenme:</dt>
+                    <dd>- @Model.LastUpdatedAt.ToLongDateString()</dd>
+                </dl>
+            </div>
+            <div class="card-footer">
+                <a asp-action="index" asp-controller="customers" class="btn btn-dark btn-sm">Veri Listesine Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card rounded text-bg-white mb-3">
+            <div class="card-header p-3 pb-0">
+                <h5>Etkinlikler:</h5>
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#customer-activities" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Güncel</button>
+                        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#lead-activities" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Önceki (Veri)</button>
+                    </div>
+                </nav>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="customer-activities" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tip</th>
+                                    <th>Başlık</th>
+                                    <th>Oluşturulma</th>
+                                    <th>Hedef</th>
+                                    <th>Tamamlanma</th>
+                                    <th>Gerçekleştiren</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Activities != null && Model.Activities.Any())
+                                {
+                                    @foreach (var item in Model.Activities)
+                                    {
+                                        <tr>
+                                            <td>@item.Type</td>
+                                            <td>@item.Subject</td>
+                                            <td>@item.CreatedAt.ToShortDateString()</td>
+                                            <td>@item.DueDate?.ToShortDateString()</td>
+                                            <td>@item.CompletedAt?.ToShortDateString()</td>
+                                            <td>@item.AssignedUserName</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-primary fw-semibold">Henüz etkinlik eklenmemiş.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="lead-activities" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tip</th>
+                                    <th>Başlık</th>
+                                    <th>Oluşturulma</th>
+                                    <th>Hedef</th>
+                                    <th>Tamamlanma</th>
+                                    <th>Gerçekleştiren</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.LeadActivities != null && Model.LeadActivities.Any())
+                                {
+                                    @foreach (var item in Model.LeadActivities)
+                                    {
+                                        <tr>
+                                            <td>@item.Type</td>
+                                            <td>@item.Subject</td>
+                                            <td>@item.CreatedAt.ToShortDateString()</td>
+                                            <td>@item.DueDate?.ToShortDateString()</td>
+                                            <td>@item.CompletedAt?.ToShortDateString()</td>
+                                            <td>@item.AssignedUserName</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-primary fw-semibold">Henüz etkinlik eklenmemiş.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card rounded text-bg-white">
+            <div class="card-header p-3">
+                <h5 class="mb-0">Fırsatlar:</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Değer</th>
+                            <th>Para Birimi</th>
+                            <th>Aşama</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Opportunities != null && Model.Opportunities.Any())
+                        {
+                            @foreach (var opp in Model.Opportunities)
+                            {
+                                <tr>
+                                    <td>@opp.Title</td>
+                                    <td>@opp.Value.ToString("N2")</td>
+                                    <td>@opp.Currency</td>
+                                    <td>@opp.Stage</td>
+                                    <td>@opp.Status</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-primary fw-semibold">Henüz fırsat eklenmemiş.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 ﻿using Core.Abstracts.IServices;
+using Core.Concretes.DTOs.Customers;
 using Core.Concretes.DTOs.Leads;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,49 @@ namespace UI.Web.Controllers
                 TempData["Errors"] = new string[] { "Dosya boş!" };
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Details(string id)
+        {
+            var lead = await leadService.GetLeadByIdAsync(id);
+
+            if (lead == null)
+            {
+                TempData["Errors"] = new string[] { "İlgili veri bulunamadı!" };
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(lead);
+        }
+
+        public async Task<IActionResult> Convert(string id)
+        {
+            var lead = await leadService.GetLeadByIdAsync(id);
+            if (lead == null)
+            {
+                TempData["Errors"] = new string[] { "İlgili veri bulunamadı!" };
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new CreateCustomerDto(lead.Name, false, lead.AssignedUserId, lead.Id);
+
+            return View(model);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Convert(CreateCustomerDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await leadService.ConvertToCustomerAsync(model);
+                if (result.IsSuccess) return RedirectToAction("Details", "Customers", new { id = result.Data });
+
+                foreach (var err in result.Errors!)
+                {
+                    ModelState.AddModelError(string.Empty, err);
+                }
+            }
+            return View(model);
         }
     }
 }

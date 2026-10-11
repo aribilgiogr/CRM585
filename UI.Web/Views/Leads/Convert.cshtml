@@ -1,0 +1,52 @@
+﻿@model CreateCustomerDto
+@{
+    ViewData["Title"] = "Müşteri Dönüşüm Formu";
+    string currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+}
+
+<div class="row">
+    <div class="col mx-auto">
+        <div class="card text-bg-light bg-gradient shadow-sm rounded-0 w-100">
+            <div class="card-body">
+                <h2 class="text-center text-muted">@ViewData["Title"]</h2>
+                <hr />
+                <form method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    @Html.HiddenFor(m => m.LeadId)
+                    @Html.HiddenFor(m => m.AssignedUserId)
+                    <div class="form-floating mb-3">
+                        <input asp-for="Name" class="form-control" />
+                        <label asp-for="Name"></label>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="TaxNumber" class="form-control" />
+                        <label asp-for="TaxNumber"></label>
+                        <span asp-validation-for="TaxNumber" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="TaxOffice" class="form-control" />
+                        <label asp-for="TaxOffice"></label>
+                        <span asp-validation-for="TaxOffice" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Address" class="form-control" />
+                        <label asp-for="Address"></label>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="City" class="form-control" />
+                        <label asp-for="City"></label>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" asp-for="Individual" />
+                        <label asp-for="Individual"></label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Dönüştür</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

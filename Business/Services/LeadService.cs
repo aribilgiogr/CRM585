@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Core.Abstracts.IServices;
+using Core.Concretes.DTOs.Customers;
 using Core.Concretes.DTOs.Leads;
 using Core.Concretes.Entities;
 using Core.Concretes.Enums;
@@ -66,6 +67,42 @@ namespace Business.Services
             }
         }
 
+        public async Task<Reply<string>> ConvertToCustomerAsync(CreateCustomerDto model)
+        {
+            try
+            {
+                var leadRepo = unitOfWork.GetRepository<Lead>();
+                var lead = await leadRepo.GetByKeyAsync(model.LeadId);
+                if (lead != null)
+                {
+                    var customerRepo = unitOfWork.GetRepository<Customer>();
+                    var customer = mapper.Map<Customer>(model);
+                    await customerRepo.CreateAsync(customer);
+                    var result = await unitOfWork.CommitAsync();
+
+                    if (result.IsSuccess)
+                    {
+                        lead.Status = LeadStatus.Converted;
+                        lead.UpdatedAt = DateTime.Now;
+                        lead.ConvertedAt = DateTime.Now;
+                        lead.ConvertedCustomerId = customer.Id;
+                        leadRepo.Update(lead);
+                        result = await unitOfWork.CommitAsync();
+                        if (result.IsSuccess)
+                        {
+                            return Reply<string>.Success(customer.Id);
+                        }
+                    }
+                    return Reply<string>.Fail(result.Errors!);
+                }
+                return Reply<string>.Fail("Veri bulunamadı!");
+            }
+            catch (Exception ex)
+            {
+                return Reply<string>.Fail(ex.Message);
+            }
+        }
+
         public async Task<Reply> CreateAsync(CreateLeadDto model)
         {
             try
@@ -79,6 +116,21 @@ namespace Business.Services
             {
                 return Reply.Fail(ex.Message);
             }
+        }
+
+        public async Task<LeadDetailDto?> GetLeadByIdAsync(string leadId)
+        {
+            var repo = unitOfWork.GetRepository<Lead>();
+            var lead = await repo.GetAll()
+                                 .Include(l => l.AssignedUser)
+                                 .Include(l => l.Activities)
+                                 .ThenInclude(a => a.AssignedUser)
+                                 .FirstOrDefaultAsync(l => l.Id == leadId);
+            if (lead != null)
+            {
+                return mapper.Map<LeadDetailDto>(lead);
+            }
+            return null;
         }
 
         public IEnumerable<LeadListItemDto> GetLeads(ClaimsPrincipal user)
